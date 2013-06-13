@@ -1,0 +1,31 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
+CMAKE_POLICY(VERSION 2.6)
+FIND_PACKAGE(Torch REQUIRED)
+FIND_PACKAGE(OpenMP)
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+FIND_PACKAGE(MKL)
+IF (MKL_FOUND)
+  SET(USE_MKL TRUE)
+ENDIF(MKL_FOUND)
+
+#SET(USE_MKL FALSE) #TODO remove
+
+IF (OPENMP_FOUND)
+  MESSAGE (STATUS "OpenMP Found with compiler flag : ${OpenMP_C_FLAGS}")
+  SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+ENDIF (OPENMP_FOUND)
+
+IF (USE_MKL)
+  MESSAGE("Using MKL")
+  SET(src spaghetti_mkl.cpp)
+  INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIR})
+  SET(MKL_LINK_DIR ${MKL_INCLUDE_DIR}/../lib/intel64)
+  SET(MKL_LIBRARIES  -Xlinker -start-group -Xlinker ${MKL_LINK_DIR}/libmkl_gf_ilp64.a -Xlinker ${MKL_LINK_DIR}/libmkl_intel_ilp64.a -Xlinker ${MKL_LINK_DIR}/libmkl_core.a -Xlinker ${MKL_LINK_DIR}/libmkl_gnu_thread.a -Xlinker -end-group)
+ELSE(USE_MKL)
+  SET(src spaghetti.cpp)
+  SET(MKL_LIBRARIES)
+ENDIF(USE_MKL)
+
+FILE(GLOB luasrc *.lua)
+ADD_TORCH_PACKAGE(spaghetti "${src}" "${luasrc}" "Machine Learning" "Sparse Linear module")
+TARGET_LINK_LIBRARIES(spaghetti luaT TH ${MKL_LIBRARIES})
