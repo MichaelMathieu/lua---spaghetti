@@ -101,7 +101,10 @@ function Spaghetti:__init(conSrc, conDst, dimDst, do_not_reset)
       self.chunks = torch.LongTensor(self.chunks)
       self.chunks:resize(1,self.chunks:size(1))
       self.chunksB = torch.LongTensor(self.chunksB)
-   end      
+   else
+      self.conSrc:add(-1) -- Careful : 0-based, only if blas
+      self.conDst:add(-1)
+   end
    
    if not do_not_reset then
       self:reset()
@@ -148,7 +151,7 @@ function Spaghetti:updateOutput(input)
       self:recomputeContiguous(self.conDst, self.conDstC,
 			       self.output:stride(), self.currentDstStride)
    end
-   libspaghetti.spaghetti_updateOutput(input, self.conSrcC, self.conDstC,
+   libspaghetti.spaghetti_updateOutput(input, self.conSrc, self.conDst,
 				       self.weight, self.output, self.chunks)
    return self.output
 end
