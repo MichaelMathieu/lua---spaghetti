@@ -108,9 +108,15 @@ static int Spaghetti_accGradParameters(lua_State* L) {
   return 0;
 }
 
+static int Spaghetti_blas(lua_State* L) {
+  lua_pushnumber(L, 1);
+  return 1;
+}
+
 static const struct luaL_reg libspaghetti[] = {
   {"spaghetti_updateOutput", Spaghetti_updateOutput},
   {"spaghetti_accGradParameters", Spaghetti_accGradParameters},
+  {"spaghetti_blas", Spaghetti_blas},
   {NULL, NULL}
 };
 
